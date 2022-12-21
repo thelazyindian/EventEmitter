@@ -39,6 +39,30 @@ class EventEmitter {
     return listener;
   }
 
+  Listener once(String event, Object? context, EventCallback callback) {
+    if (event.trim().isEmpty) {
+      throw ArgumentError.notNull('event');
+    }
+
+    var subs =
+        // ignore: prefer_collection_literals
+        _listeners.putIfAbsent(event, () => Set<Listener>());
+
+    // Create new element.
+    Listener listener = Listener.Default(event, context, callback);
+    listener.updateCallback((ev, ctx) {
+      listener.cancel();
+      callback(ev, ctx);
+    });
+    // Apply cancellation callback.
+    listener._cancelCallback = () {
+      _removeListener(listener);
+    };
+
+    subs.add(listener);
+    return listener;
+  }
+
   /// Remove event listener from emitter.
   /// This will unsubscribe the caller from the emitter from any future events.
   /// Listener should be a valid instance.

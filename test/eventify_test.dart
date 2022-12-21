@@ -13,6 +13,7 @@ void main() {
   });
 
   executeOnEventListnerTest();
+  executeOnceEventListnerTest();
   executeOffEventListnerTest();
   executeRemoveListenerTest();
   executeEmitTest();
@@ -20,6 +21,45 @@ void main() {
   removeAllByCallbackTest();
   removeAllByEventTest();
   getListenersCountTest();
+}
+
+void executeOnceEventListnerTest() {
+  group("once", () {
+    test("single listeners - fired only once", () {
+      var count = 0;
+
+      emitter.once("test", null, (ev, cont) {
+        count++;
+      });
+
+      expect(emitter.getListenersCount("test"), 1);
+      expect(count, 0);
+      emitter.emit("test");
+      expect(count, 1);
+      emitter.emit("test");
+      expect(count, 1);
+      expect(emitter.getListenersCount("test"), 0);
+    });
+
+    test("multiple listeners - each fired once", () {
+      var count = 0;
+
+      emitter.once("test", null, (ev, cont) {
+        count++;
+      });
+      emitter.once("test", null, (ev, cont) {
+        count++;
+      });
+
+      expect(emitter.getListenersCount("test"), 2);
+      expect(count, 0);
+      emitter.emit("test");
+      expect(count, 2);
+      emitter.emit("test");
+      expect(count, 2);
+      expect(emitter.getListenersCount("test"), 0);
+    });
+  }, skip: false);
 }
 
 void executeOnEventListnerTest() {
@@ -301,6 +341,23 @@ void executeOffEventListnerTest() {
       expect(emitter.getListenersCount("test2"), 0);
     });
   }, skip: false);
+
+  test("remove multiple once listeners", () {
+    var count = 0;
+
+    var listener1 = emitter.once("test", null, (ev, cont) {
+      count++;
+    });
+    var listener2 = emitter.once("test", null, (ev, cont) {
+      count++;
+    });
+
+    expect(emitter.getListenersCount("test"), 2);
+    emitter.off(listener1);
+    expect(emitter.getListenersCount("test"), 1);
+    listener2.cancel();
+    expect(emitter.getListenersCount("test"), 0);
+  });
 }
 
 void executeRemoveListenerTest() {

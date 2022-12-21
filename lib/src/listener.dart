@@ -24,20 +24,23 @@ class Listener {
   final Object? context;
 
   /// The event callback, which the subscriber uses when he register it for.
-  final EventCallback callback;
+  EventCallback _callback;
+  EventCallback get callback => _callback;
 
   /// Constructor for Listener.
   /// This will take four arguments.
   /// [eventName], [callback] are mandatory.
   /// [context], [_cancelCallback] are optional.
   /// if [_cancelCallback] callback is provided, then the listener can use that to cancel the subscription.
-  Listener(this.eventName, this.context, this.callback, this._cancelCallback);
+  Listener(this.eventName, this.context, this._callback, this._cancelCallback);
 
   /// Constructor for Listener.
   /// This will take four arguments.
   /// [eventName], [callback] are mandatory.
   /// [context] is optional.
-  Listener.Default(this.eventName, this.context, this.callback);
+  Listener.Default(this.eventName, this.context, this._callback);
+
+  void updateCallback(EventCallback callback) => _callback = callback;
 
   /// Cancel the event subscription with the subject.
   /// Eventhough the cancel method is called, listener doesn't check the cancellation of the subscription.
